@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import csv
+import json
 import sys
+import os
 from datetime import datetime
-from update_broadcasts import BroadcastManager
 
 def parse_date(date_str):
     """Convert date string to YYYY-MM-DD format."""
@@ -40,13 +41,32 @@ def extract_tags(title):
     
     return tags
 
-def import_csv(csv_path):
+def import_csv(csv_path, json_path='../data/broadcasts.json'):
     """Import data from CSV file into broadcasts.json."""
-    manager = BroadcastManager()
+    # Initialize the JSON structure
+    data = {
+        "project": "CousinFM Community Data Hub",
+        "description": "Archive of CousinFM radio broadcasts and related media",
+        "version": "1.0.0",
+        "lastUpdated": datetime.now().strftime("%Y-%m-%d"),
+        "broadcasts": []
+    }
+    
+    # Read existing data if file exists
+    if os.path.exists(json_path):
+        with open(json_path, 'r') as jsonfile:
+            data = json.load(jsonfile)
+    
+    # Track existing CIDs to avoid duplicates
+    existing_cids = {broadcast["cid"] for broadcast in data["broadcasts"]}
     
     with open(csv_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            cid = row['CID'].strip()
+            if not cid or cid in existing_cids:
+                continue
+                
             title = clean_title(row['Title'])
             tags = extract_tags(title)
             
@@ -57,23 +77,33 @@ def import_csv(csv_path):
                 file_type = "video"
                 format = "mp4"
             
-            success = manager.add_broadcast(
-                title=title,
-                cid=row['CID'],
-                file_size=row['File Size'],
-                date_uploaded=parse_date(row['Date']),
-                file_type=file_type,
-                format=format,
-                tags=tags
-            )
+            broadcast = {
+                "cid": cid,
+                "title": title,
+                "fileSize": row['File Size'],
+                "dateUploaded": parse_date(row['Date']),
+                "type": file_type,
+                "format": format,
+                "tags": tags,
+                "gateway": {
+                    "ipfs": f"https://ipfs.io/ipfs/{cid}",
+                    "dweb": f"dweb:/ipfs/{cid}"
+                }
+            }
             
-            if success:
-                print(f"Added: {title}")
-            else:
-                print(f"Skipped or failed: {title}")
+            data["broadcasts"].append(broadcast)
+            existing_cids.add(cid)
+            print(f"Added: {title}")
     
-    manager.save()
-    print("\nImport completed!")
+    # Sort broadcasts by date
+    data["broadcasts"].sort(key=lambda x: x["dateUploaded"], reverse=True)
+    
+    # Save the updated data
+    os.makedirs(os.path.dirname(json_path), exist_ok=True)
+    with open(json_path, 'w') as jsonfile:
+        json.dump(data, jsonfile, indent=2)
+    
+    print(f"\nImport completed! Total broadcasts: {len(data['broadcasts'])}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
