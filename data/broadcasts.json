@@ -1,0 +1,21 @@
+{
+  "project": "CousinFM Community Data Hub",
+  "description": "Archive of CousinFM radio broadcasts and related media",
+  "version": "1.0.0",
+  "lastUpdated": "2024-03-29",
+  "broadcasts": [
+    {
+      "cid": "Qma9YJpugNaorhBnYwRWVTYnCbCzcZt8M6tcAbUzxupT88",
+      "title": "Cousin of Ideas Mix w CV HydeFM 7-23-2022",
+      "fileSize": "142.03 MB",
+      "dateUploaded": "2022-11-28",
+      "type": "audio",
+      "format": "mp3",
+      "tags": ["mix", "hyde fm", "collaboration"],
+      "gateway": {
+        "ipfs": "https://ipfs.io/ipfs/Qma9YJpugNaorhBnYwRWVTYnCbCzcZt8M6tcAbUzxupT88",
+        "dweb": "dweb:/ipfs/Qma9YJpugNaorhBnYwRWVTYnCbCzcZt8M6tcAbUzxupT88"
+      }
+    }
+  ]
+} 
