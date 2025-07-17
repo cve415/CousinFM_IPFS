@@ -1,4 +1,4 @@
-# CousinFM Community Data Hub
+# CousinFM CID ARCHIVE
 
 A centralized repository for managing and accessing CousinFM broadcast archives using IPFS. This hub provides structured metadata and tools for managing broadcast data.
 
